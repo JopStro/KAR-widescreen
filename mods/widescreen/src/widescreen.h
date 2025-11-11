@@ -17,6 +17,8 @@ int is_widescreen = 0;
 
 const short pillarbox_viewport[2] = {80, 560};
 
+#define RATIO 0.75
+
 static void Wide_ChangeSetting(int val);
 
 #endif // WIDESCREEN_H

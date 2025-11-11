@@ -19,6 +19,10 @@ OptionDesc ModSettings = {
     }
 };
 
+void OnBoot() {
+    
+}
+
 // Runs on startup after any save data is loaded into memory.
 // This callback is executed regardless of if a memory card is inserted or contained existing save data.
 void OnSaveLoaded()

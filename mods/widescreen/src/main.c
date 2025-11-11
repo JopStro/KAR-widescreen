@@ -21,7 +21,7 @@ OptionDesc ModSettings = {
         "4:3",
         "16:9",
     }
-}
+};
 
 // Runs immediately after the mod file is loaded.
 // Calls to HSD_MemAlloc in THIS function specifically wil persist throughout the entire runtime of the game.

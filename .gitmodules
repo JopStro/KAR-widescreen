@@ -1,3 +1,6 @@
 [submodule "externals/hoshi"]
 	path = externals/hoshi
 	url = https://github.com/UnclePunch/hoshi
+[submodule "externals/dolsdk"]
+	path = externals/dolsdk
+	url = https://github.com/doldecomp/dolsdk2001

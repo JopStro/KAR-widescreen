@@ -1,24 +1,31 @@
 #ifndef WIDESCREEN_H
 #define WIDESCREEN_H
 
+#include "datatypes.h"
+#include "hsd.h"
+#include "structs.h"
 #define MOD_NAME "Widescreen Support"
 
 static float *stc_aspect = (float*)0x805deb20;
 float default_aspect;
 
-#define NUM_VIDEO_VIEWPORTS 3
-// "declare array of pointer to array 4 of short", I hate C type declarations
-static short (*stc_video_viewports[NUM_VIDEO_VIEWPORTS])[4] = {
-  (short (*)[4])0x80495b40,
-  (short (*)[4])0x80495bb8,
-  (short (*)[4])0x80497334,
+#define NUM_VIDEO_DESCS 3
+static COBJDesc *stc_video_descs[NUM_VIDEO_DESCS] = {
+  (COBJDesc *)0x80495b38,
+  (COBJDesc *)0x80495bb0,
+  (COBJDesc *)0x8049732C,
 };
 
 int is_widescreen = 0;
+
+static void (*C_MTXPerspective)(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f) = (void*)0x803d1f30;
 
 #define RATIO 0.75
 
 static void Wide_ChangeSetting(int);
 static void Wide_UpdateCObjs(int);
+static void Wide_CanvasSetOrtho(COBJ* cobj, float top, float bottom, float left, float right);
+static void Wide_CorrectPerspectiveMTX(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f);
+static void Wide_TopRideCOBJLoadDesc(COBJDesc *desc);
 
 #endif // WIDESCREEN_H

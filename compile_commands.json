@@ -16,83 +16,11 @@
       "-Iexternals/hoshi/Lib",
       "-c",
       "-o",
-      "build/externals/hoshi/Lib/fst/fst.o",
-      "externals/hoshi/Lib/fst/fst.c"
+      "build/mods/widescreen/src/widescreen.o",
+      "mods/widescreen/src/widescreen.c"
     ],
     "directory": "/home/jostro/Sources/hoshi-mod",
-    "file": "/home/jostro/Sources/hoshi-mod/externals/hoshi/Lib/fst/fst.c",
-    "output": "/home/jostro/Sources/hoshi-mod/build/externals/hoshi/Lib/fst/fst.o"
-  },
-  {
-    "arguments": [
-      "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc",
-      "-O1",
-      "-mcpu=750",
-      "-mhard-float",
-      "-ffreestanding",
-      "-fno-unwind-tables",
-      "-fno-exceptions",
-      "-fno-asynchronous-unwind-tables",
-      "-fno-merge-constants",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Iexternals/hoshi/include",
-      "-Iexternals/hoshi/Lib",
-      "-c",
-      "-o",
-      "build/externals/hoshi/Lib/code_patch/code_patch.o",
-      "externals/hoshi/Lib/code_patch/code_patch.c"
-    ],
-    "directory": "/home/jostro/Sources/hoshi-mod",
-    "file": "/home/jostro/Sources/hoshi-mod/externals/hoshi/Lib/code_patch/code_patch.c",
-    "output": "/home/jostro/Sources/hoshi-mod/build/externals/hoshi/Lib/code_patch/code_patch.o"
-  },
-  {
-    "arguments": [
-      "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc",
-      "-O1",
-      "-mcpu=750",
-      "-mhard-float",
-      "-ffreestanding",
-      "-fno-unwind-tables",
-      "-fno-exceptions",
-      "-fno-asynchronous-unwind-tables",
-      "-fno-merge-constants",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Iexternals/hoshi/include",
-      "-Iexternals/hoshi/Lib",
-      "-c",
-      "-o",
-      "build/externals/hoshi/Lib/text_joint/text_joint.o",
-      "externals/hoshi/Lib/text_joint/text_joint.c"
-    ],
-    "directory": "/home/jostro/Sources/hoshi-mod",
-    "file": "/home/jostro/Sources/hoshi-mod/externals/hoshi/Lib/text_joint/text_joint.c",
-    "output": "/home/jostro/Sources/hoshi-mod/build/externals/hoshi/Lib/text_joint/text_joint.o"
-  },
-  {
-    "arguments": [
-      "/opt/devkitpro/devkitPPC/bin/powerpc-eabi-gcc",
-      "-O1",
-      "-mcpu=750",
-      "-mhard-float",
-      "-ffreestanding",
-      "-fno-unwind-tables",
-      "-fno-exceptions",
-      "-fno-asynchronous-unwind-tables",
-      "-fno-merge-constants",
-      "-ffunction-sections",
-      "-fdata-sections",
-      "-Iexternals/hoshi/include",
-      "-Iexternals/hoshi/Lib",
-      "-c",
-      "-o",
-      "build/mods/widescreen/src/main.o",
-      "mods/widescreen/src/main.c"
-    ],
-    "directory": "/home/jostro/Sources/hoshi-mod",
-    "file": "/home/jostro/Sources/hoshi-mod/mods/widescreen/src/main.c",
-    "output": "/home/jostro/Sources/hoshi-mod/build/mods/widescreen/src/main.o"
+    "file": "/home/jostro/Sources/hoshi-mod/mods/widescreen/src/widescreen.c",
+    "output": "/home/jostro/Sources/hoshi-mod/build/mods/widescreen/src/widescreen.o"
   }
 ]

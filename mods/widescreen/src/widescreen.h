@@ -4,6 +4,7 @@
 #define MOD_NAME "Widescreen Support"
 
 static float *stc_aspect = (float*)0x805deb20;
+float default_aspect;
 
 #define NUM_VIDEO_VIEWPORTS 3
 // "declare array of pointer to array 4 of short", I hate C type declarations
@@ -17,6 +18,7 @@ int is_widescreen = 0;
 
 #define RATIO 0.75
 
-static void Wide_ChangeSetting(int val);
+static void Wide_ChangeSetting(int);
+static void Wide_UpdateCObjs(int);
 
 #endif // WIDESCREEN_H

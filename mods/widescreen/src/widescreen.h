@@ -2,9 +2,9 @@
 #define WIDESCREEN_H
 
 #include "datatypes.h"
-#include "hsd.h"
 #include "structs.h"
 #define MOD_NAME "Widescreen Support"
+#define RATIO 0.75
 
 static float *stc_aspect = (float*)0x805deb20;
 float default_aspect;
@@ -19,8 +19,6 @@ static COBJDesc *stc_video_descs[NUM_VIDEO_DESCS] = {
 int is_widescreen = 0;
 
 static void (*C_MTXPerspective)(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f) = (void*)0x803d1f30;
-
-#define RATIO 0.75
 
 static void Wide_ChangeSetting(int);
 static void Wide_UpdateCObjs(int);

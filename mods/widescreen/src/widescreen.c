@@ -1,10 +1,11 @@
+#include "hsd.h"
+#include "inline.h"
 #include "structs.h"
 #include "text.h"
 #include "obj.h"
 #include "scene.h"
 #include "hoshi/settings.h"
 #include "code_patch/code_patch.h"
-
 
 #include "widescreen.h"
 
@@ -25,8 +26,11 @@ OptionDesc ModSettings = {
     }
 };
 
+JOBJDesc *border_jobj;
+
 void OnBoot() {
     default_aspect = *stc_aspect;
+    
     CODEPATCH_REPLACECALL(0x8044f774, Wide_CanvasSetOrtho);
     CODEPATCH_REPLACECALL(0x80064594, Wide_CorrectPerspectiveMTX);
     CODEPATCH_REPLACECALL(0x80385668, Wide_CorrectPerspectiveMTX);
@@ -36,6 +40,19 @@ void OnBoot() {
     CODEPATCH_REPLACECALL(0x8038250c, Wide_TopRideCOBJLoadDesc);
     CODEPATCH_REPLACECALL(0x8037199c, Wide_TopRideCOBJLoadDesc);
     
+    HSD_Archive *archive = Archive_LoadFile("IfBorderAll");
+    border_jobj = Archive_GetPublicAddress(archive, "IfBorderAll");
+       
+    return;
+}
+
+void OnSceneChange() {
+    MinorKind mnrkind = Scene_GetCurrentMinor();
+    if (mnrkind == MNRKIND_3D || mnrkind == MNRKIND_19) return;
+    GOBJ *gobj = GOBJ_EZCreator(0, 0, 0, 0, 0, 
+                                HSD_OBJKIND_JOBJ, border_jobj, 
+                                0, 0, 
+                                JObj_GX, 63, 4);
     return;
 }
 
@@ -118,3 +135,4 @@ void Wide_TopRideCOBJLoadDesc(COBJDesc *desc) {
         COBJ_LoadDesc(desc);
     }
 }
+

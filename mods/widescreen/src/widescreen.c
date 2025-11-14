@@ -28,6 +28,10 @@ OptionDesc ModSettings = {
 
 JOBJDesc *border_jobj;
 
+CODEPATCH_HOOKCREATE(0x80114be8, "", Wide_CreateHudElementHook, "", 0);
+CODEPATCH_HOOKCREATE(0x80114a84, "", Wide_CreateHudElementHook, "", 0);
+CODEPATCH_HOOKCREATE(0x80119960, "", Wide_CreateHudElementHook, "", 0);
+
 void OnBoot() {
     default_aspect = *stc_aspect;
     
@@ -39,6 +43,10 @@ void OnBoot() {
     CODEPATCH_REPLACECALL(0x8037a0fc, Wide_TopRideCOBJLoadDesc);
     CODEPATCH_REPLACECALL(0x8038250c, Wide_TopRideCOBJLoadDesc);
     CODEPATCH_REPLACECALL(0x8037199c, Wide_TopRideCOBJLoadDesc);
+    
+    CODEPATCH_HOOKAPPLY(0x80114be8);
+    CODEPATCH_HOOKAPPLY(0x80114a84);
+    CODEPATCH_HOOKAPPLY(0x80119960);
     
     HSD_Archive *archive = Archive_LoadFile("IfBorderAll");
     border_jobj = Archive_GetPublicAddress(archive, "IfBorderAll");
@@ -126,13 +134,42 @@ void Wide_CorrectPerspectiveMTX(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f) {
     }
 }
 
-void Wide_TopRideCOBJLoadDesc(COBJDesc *desc) {
+COBJ *Wide_TopRideCOBJLoadDesc(COBJDesc *desc) {
+    COBJ *obj;
     if (is_widescreen) {
         desc->projection_param.perspective.aspect /= RATIO;
-        COBJ_LoadDesc(desc);
+        obj = COBJ_LoadDesc(desc);
         desc->projection_param.perspective.aspect *= RATIO;
     } else {
-        COBJ_LoadDesc(desc);
+        obj = COBJ_LoadDesc(desc);
     }
+    return obj;
 }
+
+void Wide_CreateHudElementHook(JOBJ *obj) {
+    if (!is_widescreen || Scene_GetCurrentMinor() != MNRKIND_3D) return;
+    if (!obj->child) {
+        obj->trans.X += 10;
+        return;
+    }
+    JOBJ *root; // Workaround for the needle copy ability
+    if (!obj->child->sibling && obj->child->child) {
+        root = obj->child;
+    } else {
+        root = obj;
+    }
+    
+    int left = 0, right = 0;
+    for (JOBJ* m = root->child; m; m = m->sibling) {
+        if (m->trans.X > 0) {
+            right = 1;
+        } else if (m->trans.X < 0) {
+            left = 1;
+        }
+    }
+    if (left && right) return;
+    obj->trans.X += left ? -10 : right ? 10 : 0;
+    return;
+}
+
 

@@ -24,6 +24,7 @@ static void Wide_ChangeSetting(int);
 static void Wide_UpdateCObjs(int);
 static void Wide_CanvasSetOrtho(COBJ* cobj, float top, float bottom, float left, float right);
 static void Wide_CorrectPerspectiveMTX(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f);
-static void Wide_TopRideCOBJLoadDesc(COBJDesc *desc);
+static COBJ *Wide_TopRideCOBJLoadDesc(COBJDesc *desc);
+static void Wide_CreateHudElementHook(JOBJ *obj);
 
 #endif // WIDESCREEN_H

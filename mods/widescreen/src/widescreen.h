@@ -3,6 +3,19 @@
 
 #include "datatypes.h"
 #include "structs.h"
+
+typedef struct IndicatorData {
+  int x0;
+  int num_plyviews;
+  int viewdata; // first four bytes is the view index
+  float xC;
+  float x10;
+  int x14;
+  int x18;
+  int ply_indicated;
+  int is_visible;
+} IndicatorData;
+
 #define MOD_NAME "Widescreen Support"
 #define RATIO 0.75
 
@@ -35,7 +48,10 @@ static void Wide_CanvasSetOrtho(COBJ* cobj, float top, float bottom, float left,
 static void Wide_CorrectPerspectiveMTX(Mtx44 m, f32 fovY, f32 aspect, f32 n, f32 f);
 static float Wide_COBJLoadAdjustAspect(float);
 static void Wide_CreateHudElementHook(JOBJ *obj, int cpy);
+static void Wide_ShiftHudElement(JOBJ *obj, int negate, int neg_splitscreen);
 static void Wide_IndicatorCOBJHOOK(COBJ *obj);
 static void Wide_MapDotsCOBJHOOK(COBJ *obj);
+static void Wide_PlyViewPosCreateHook(GOBJ *obj);
+static void Wide_IndicatorGXHook(IndicatorData *data, float *x);
 
 #endif // WIDESCREEN_H

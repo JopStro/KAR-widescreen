@@ -29,12 +29,17 @@ OptionDesc ModSettings = {
 
 JOBJDesc *border_jobj;
 
-CODEPATCH_HOOKCREATE(0x80114be8, "li 4, 0\n\t", Wide_CreateHudElementHook, "", 0);
-CODEPATCH_HOOKCREATE(0x80114a84, "li 4, 0\n\t", Wide_CreateHudElementHook, "", 0); // Health Bar and Boost Charge
-CODEPATCH_HOOKCREATE(0x80119960, "li 4, 1\n\t", Wide_CreateHudElementHook, "", 0); // Copy Abilities
-CODEPATCH_HOOKCREATE(0x80115a08, "", Wide_IndicatorCOBJHOOK, "", 0);
-CODEPATCH_HOOKCREATE(0x80115aac, "", Wide_MapDotsCOBJHOOK, "", 0);
+CODEPATCH_HOOKCREATE(0x80114cec, "mr 3, 31\n\tli 4, 0\n\t", Wide_CreateHudElementHook, "", 0)
+CODEPATCH_HOOKCREATE(0x80114b8c, "mr 3, 30\n\tli 4, 0\n\tli 5, 0\n\t", Wide_ShiftHudElement, "mr 3, 31\n\t", 0) // Health Bar and Boost Charge
+CODEPATCH_HOOKCREATE(0x80119a8c, "mr 3, 25\n\tli 4, 0\n\tli 5, 0\n\t", Wide_ShiftHudElement, "", 0) // Copy Abilities
+CODEPATCH_HOOKCREATE(0x8012f39c, "mr 3, 31\n\tli 4, 1\n\tli 5, 1\n\t", Wide_ShiftHudElement, "", 0) // Stadium Points Splash
+CODEPATCH_HOOKCREATE(0x80115a08, "", Wide_IndicatorCOBJHOOK, "", 0)
+CODEPATCH_HOOKCREATE(0x80115aac, "", Wide_MapDotsCOBJHOOK, "", 0)
 CODEPATCH_HOOKCREATE(0x8040313c, "", Wide_COBJLoadAdjustAspect, "cmplwi 30, 0\n\t", 0)
+CODEPATCH_HOOKCREATE(0x80125d88, "mr 3, 29\n\t", Wide_PlyViewPosCreateHook, "", 0)
+CODEPATCH_HOOKCREATE(0x8011faa0, "mr 3, 31\n\taddi 4, 1, 0x34\n\t", Wide_IndicatorGXHook, "", 0) // Players
+CODEPATCH_HOOKCREATE(0x8012137c, "mr 3, 31\n\taddi 4, 1, 0x14\n\t", Wide_IndicatorGXHook, "", 0) // Enemies
+CODEPATCH_HOOKCREATE(0x80120cb0, "mr 3, 30\n\taddi 4, 1, 0x38\n\t", Wide_IndicatorGXHook, "", 0) // PlIcons
 
 void OnBoot() {
     default_aspect = *stc_aspect;
@@ -43,13 +48,18 @@ void OnBoot() {
     CODEPATCH_REPLACECALL(0x80064594, Wide_CorrectPerspectiveMTX);
     CODEPATCH_REPLACECALL(0x80385668, Wide_CorrectPerspectiveMTX);
     
-    CODEPATCH_HOOKAPPLY(0x80114be8);
-    CODEPATCH_HOOKAPPLY(0x80114a84);
-    CODEPATCH_HOOKAPPLY(0x80119960);
+    CODEPATCH_HOOKAPPLY(0x80114cec);
+    CODEPATCH_HOOKAPPLY(0x80114b8c);
+    CODEPATCH_HOOKAPPLY(0x80119a8c);
     CODEPATCH_HOOKAPPLY(0x80115a08);
     CODEPATCH_HOOKAPPLY(0x80115aac);
     CODEPATCH_HOOKAPPLY(0x8040313c);
-    
+    CODEPATCH_HOOKAPPLY(0x80125d88);
+    CODEPATCH_HOOKAPPLY(0x8011faa0);
+    CODEPATCH_HOOKAPPLY(0x8012137c);    
+    CODEPATCH_HOOKAPPLY(0x80120cb0);
+    CODEPATCH_HOOKAPPLY(0x8012f39c);
+
     HSD_Archive *archive = Archive_LoadFile("IfBorderAll");
     border_jobj = Archive_GetPublicAddress(archive, "IfBorderAll");
        
@@ -58,7 +68,7 @@ void OnBoot() {
 
 void OnSceneChange() {
     MinorKind mnrkind = Scene_GetCurrentMinor();
-    if (mnrkind == MNRKIND_3D || mnrkind == MNRKIND_19) return;
+    if (mnrkind == MNRKIND_3D || mnrkind == MNRKIND_19 || mnrkind == MNRKIND_DEBUGMENU) return;
     GOBJ *gobj = GOBJ_EZCreator(0, 0, 0, 0, 0, 
                                 HSD_OBJKIND_JOBJ, border_jobj, 
                                 0, 0, 
@@ -102,6 +112,8 @@ void Wide_ChangeSetting(int val) {
     }
     return;
 }
+
+
 
 void Wide_UpdateCObjs(int val) {
     GOBJ *m = stc_scene_menu_common->cam_gobj;
@@ -157,9 +169,10 @@ float Wide_COBJLoadAdjustAspect(float aspect) {
 }
 
 void Wide_CreateHudElementHook(JOBJ *obj, int cpy) {
-    if (!is_widescreen || Scene_GetCurrentMinor() != MNRKIND_3D) return;
-    if (cpy || !obj->child || obj->trans.X > 0) {
-        obj->trans.X += 10;
+    if (!is_widescreen) return;
+    float shift_by = Gm_GetPlyViewNum() <= 2 ? 10 : 5;
+    if (cpy || !obj->child) {
+        obj->trans.X += shift_by;
         return;
     }
     
@@ -172,8 +185,16 @@ void Wide_CreateHudElementHook(JOBJ *obj, int cpy) {
         }
     }
     if (left && right) return;
-    obj->trans.X += left ? -10 : right ? 10 : 0;
+    obj->trans.X += left ? -shift_by : right ? shift_by : 0;
     return;
+}
+
+void Wide_ShiftHudElement(JOBJ *obj, int negate, int neg_splitscreen) {
+    if (!is_widescreen) return;
+    float shift_by = Gm_GetPlyViewNum() <= 2 ? 10 : 5;
+    shift_by *= negate ? -1 : 1;
+    if (Gm_GetPlyViewNum() > 1 && neg_splitscreen) shift_by *= -1;
+    obj->trans.X += shift_by;
 }
 
 void Wide_IndicatorCOBJHOOK(COBJ *obj) {
@@ -183,15 +204,54 @@ void Wide_IndicatorCOBJHOOK(COBJ *obj) {
         obj->projection_param.ortho.right += adjustment;
     }
 }
+
 void Wide_MapDotsCOBJHOOK(COBJ *obj) {
-    if (is_widescreen) {
-        if (Gm_IsInCity()) {
-            obj->viewport_right -= 160 - 12;
-            obj->viewport_left += 12;
-        } else {
-            obj->viewport_left += 160 - 12;
-            obj->viewport_right -= 12;
+    if (!is_widescreen) return;
+    if (Gm_GetPlyViewNum() > 2) {
+        if (Gm_GetPlyViewNum() == 4) return;
+        s8 *views = Gm_Get3dData()->plyview_lookup;
+        int i = 0;
+        while (i < 4) {
+            if (views[i] == -1) {
+                break;
+            }
+            i++;
         }
+        if (i < 2) {
+            obj->viewport_right -= 160 - 41;
+            obj->viewport_left += 41;
+        } else {
+            obj->viewport_left += 160 - 41;
+            obj->viewport_right -= 41;
+        }
+    } else if (Gm_IsInCity()) {
+        obj->viewport_right -= 160 - 12;
+        obj->viewport_left += 12;
+    } else {
+        obj->viewport_left += 160 - 12;
+        obj->viewport_right -= 12;
     }
 }
 
+void Wide_PlyViewPosCreateHook(GOBJ *obj) {
+    if (!is_widescreen) return;
+    PlyViewPosData *data = obj->userdata;
+    int num = Gm_GetPlyViewNum();
+    if (num <= 2) return;
+    data->plyview_center_pos[0].X -= 5;
+    data->plyview_center_pos[1].X -= 5;
+    data->plyview_center_pos[2].X += 5;
+    data->plyview_center_pos[3].X += 5;
+}
+
+void Wide_IndicatorGXHook(IndicatorData *data, float *x) {
+    if (!is_widescreen) return;
+    if (Gm_GetPlyViewNum() <= 2) return;
+    float adjustment = (640 / 0.75 - 640) / 4;
+    int ply = data->viewdata >> 28;
+    if (Ply_GetViewIndex(ply) < 2) {
+        *x -= adjustment;
+    } else {
+        *x += adjustment;
+    }
+}

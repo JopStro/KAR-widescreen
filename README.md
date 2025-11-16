@@ -1,4 +1,8 @@
-This repository is a **template project** for building a Kirby Air Ride mod using the [Hoshi](https://github.com/UnclePunch/hoshi) modding framework.
+True widescreen for Kirby Air Ride, made using the [Hoshi](https://github.com/UnclePunch/hoshi) modding framework.
+
+![Screenshot of City Trial in wide screen](screenshot.png)
+
+**NOTE:** By default widescreen is turned off, make sure to change the aspect ratio option to wide in `Options -> Settings` to enable it.
 
 # Build Instructions
 

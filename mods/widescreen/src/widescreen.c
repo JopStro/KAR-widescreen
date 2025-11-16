@@ -10,9 +10,9 @@
 
 #include "widescreen.h"
 
-char ModName[] = MOD_NAME;      // Name of the mod.
-char ModAuthor[] = "JoStro"; // Creator of the mod.
-char ModVersion[] = "v0.1";     // Version of the mod.
+char ModName[] = MOD_NAME;
+char ModAuthor[] = "JoStro";
+char ModVersion[] = "v1.0";
 
 OptionDesc ModSettings = {
     .name = "Aspect Ratio",

@@ -100,8 +100,6 @@ void Wide_ChangeSetting(int val) {
     if (val) {
         *stc_aspect = default_aspect / RATIO;
         *stc_plicon_bound = ((640 / RATIO - 640) / 2 + 640 - *stc_plicon_bound) - 320;
-        // *stc_plicon_left = 10 - ((640 / RATIO - 640) / 2);
-        // *stc_plicon_right = 630 + ((640 / RATIO - 640) / 2);
         (*stc_ar_map_viewport)[0] = 552;
         (*stc_ar_map_viewport)[1] = 632;
         (*stc_ct_map_viewport)[1] = 120;
@@ -111,8 +109,6 @@ void Wide_ChangeSetting(int val) {
     } else {
         *stc_aspect = default_aspect;
         *stc_plicon_bound = 160;
-        // *stc_plicon_left = 10;
-        // *stc_plicon_right = 630;
         (*stc_ar_map_viewport)[0] = 523;
         (*stc_ar_map_viewport)[1] = 630;
         (*stc_ct_map_viewport)[1] = 160;

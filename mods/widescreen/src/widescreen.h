@@ -4,18 +4,6 @@
 #include "datatypes.h"
 #include "structs.h"
 
-typedef struct IndicatorData {
-  int x0;
-  int x4;
-  int viewdata; // first four bytes is the player index for the view
-  float xC;
-  float x10;
-  int x14;
-  int x18;
-  int ply_indicated; // possibly a union/different for enemy indicators
-  int is_visible;
-} IndicatorData;
-
 #define MOD_NAME "Widescreen Support"
 #define RATIO 0.75
 
@@ -29,8 +17,6 @@ static short (*stc_ct_map_viewport)[4] = (void *)0x805d5320;
 static short (*stc_ct_map_scissor)[4]  = (void *)0x805d5328;
 
 static float *stc_plicon_bound = (float *)0x805dfdd8;
-static float *stc_plicon_left = (float *)0x805dfdec;
-static float *stc_plicon_right = (float *)0x805dfdf0;
 
 #define NUM_VIDEO_DESCS 3
 static COBJDesc *stc_video_descs[NUM_VIDEO_DESCS] = {

@@ -37,9 +37,17 @@ CODEPATCH_HOOKCREATE(0x80115a08, "", Wide_IndicatorCOBJHOOK, "", 0)
 CODEPATCH_HOOKCREATE(0x80115aac, "", Wide_MapDotsCOBJHOOK, "", 0)
 CODEPATCH_HOOKCREATE(0x8040313c, "", Wide_COBJLoadAdjustAspect, "cmplwi 30, 0\n\t", 0)
 CODEPATCH_HOOKCREATE(0x80125d88, "mr 3, 29\n\t", Wide_PlyViewPosCreateHook, "", 0)
-CODEPATCH_HOOKCREATE(0x8011faa0, "mr 3, 31\n\taddi 4, 1, 0x34\n\t", Wide_IndicatorGXHook, "", 0) // Players
-CODEPATCH_HOOKCREATE(0x8012137c, "mr 3, 31\n\taddi 4, 1, 0x14\n\t", Wide_IndicatorGXHook, "", 0) // Enemies
-CODEPATCH_HOOKCREATE(0x80120cb0, "mr 3, 30\n\taddi 4, 1, 0x38\n\t", Wide_IndicatorGXHook, "", 0) // PlIcons
+CODEPATCH_HOOKCREATE(0x8011faa0, "lbz 3, 0x8(31)\n\trlwinm	3, 3, 28, 28, 31\n\taddi 4, 1, 0x34\n\t",
+                      Wide_IndicatorGXHook, "", 0) // Players
+CODEPATCH_HOOKCREATE(0x8012137c, "lbz 3, 0x8(31)\n\trlwinm	3, 3, 28, 28, 31\n\taddi 4, 1, 0x14\n\t",
+                      Wide_IndicatorGXHook, "", 0) // Enemies
+CODEPATCH_HOOKCREATE(0x80120cb0, "lbz 4, 0x8(30)\n\trlwinm	4, 4, 28, 28, 31\n\taddi 5, 1, 0x38\n\t",
+                      Wide_PlIconGXHook, "", 0) // PlIcons
+CODEPATCH_HOOKCREATE(0x8012245c, "mr 3, 28\n\taddi 4, 1, 0x18\n\t",
+                      Wide_IndicatorGXHook, "", 0) // Vehicles
+CODEPATCH_HOOKCREATE(0x80121e40, "mr 3, 25\n\taddi 4, 1, 0x2C\n\t",
+                      Wide_IndicatorGXHook, "", 0) // Crates
+CODEPATCH_HOOKCREATE(0x80128d4c, "mr 3, 28\n\tmr 4, 27\n\t", Wide_CreateStatChartHook, "", 0);
 
 void OnBoot() {
     default_aspect = *stc_aspect;
@@ -56,9 +64,12 @@ void OnBoot() {
     CODEPATCH_HOOKAPPLY(0x8040313c);
     CODEPATCH_HOOKAPPLY(0x80125d88);
     CODEPATCH_HOOKAPPLY(0x8011faa0);
-    CODEPATCH_HOOKAPPLY(0x8012137c);    
+    CODEPATCH_HOOKAPPLY(0x8012137c);
     CODEPATCH_HOOKAPPLY(0x80120cb0);
     CODEPATCH_HOOKAPPLY(0x8012f39c);
+    CODEPATCH_HOOKAPPLY(0x8012245c);
+    CODEPATCH_HOOKAPPLY(0x80121e40);
+    CODEPATCH_HOOKAPPLY(0x80128d4c);
 
     HSD_Archive *archive = Archive_LoadFile("IfBorderAll");
     border_jobj = Archive_GetPublicAddress(archive, "IfBorderAll");
@@ -72,14 +83,25 @@ void OnSceneChange() {
     GOBJ *gobj = GOBJ_EZCreator(0, 0, 0, 0, 0, 
                                 HSD_OBJKIND_JOBJ, border_jobj, 
                                 0, 0, 
-                                JObj_GX, 63, 4);
+                                JObj_GX, 62, 4);
+    Text_CreateCanvas(1, 0, 0, 0, 0, 62, 0, 63); // Rendered on a text canvas for simplicity
+    
     return;
+}
+
+void Wide_BorderCamGX(GOBJ *g) {
+    if (!is_widescreen) return;
+    if (!CObj_SetCurrent(g->hsd_object)) return;
+    CObj_RenderGXLinks(g, (1 << 0) | (1 << 1) | (1 << 2));
+    CObj_EndCurrent();
 }
 
 void Wide_ChangeSetting(int val) {
     if (val) {
         *stc_aspect = default_aspect / RATIO;
-        *stc_plicon_bound = (640 / RATIO - *stc_plicon_bound) - 320;
+        *stc_plicon_bound = ((640 / RATIO - 640) / 2 + 640 - *stc_plicon_bound) - 320;
+        // *stc_plicon_left = 10 - ((640 / RATIO - 640) / 2);
+        // *stc_plicon_right = 630 + ((640 / RATIO - 640) / 2);
         (*stc_ar_map_viewport)[0] = 552;
         (*stc_ar_map_viewport)[1] = 632;
         (*stc_ct_map_viewport)[1] = 120;
@@ -89,6 +111,8 @@ void Wide_ChangeSetting(int val) {
     } else {
         *stc_aspect = default_aspect;
         *stc_plicon_bound = 160;
+        // *stc_plicon_left = 10;
+        // *stc_plicon_right = 630;
         (*stc_ar_map_viewport)[0] = 523;
         (*stc_ar_map_viewport)[1] = 630;
         (*stc_ct_map_viewport)[1] = 160;
@@ -224,6 +248,10 @@ void Wide_MapDotsCOBJHOOK(COBJ *obj) {
             obj->viewport_left += 160 - 41;
             obj->viewport_right -= 41;
         }
+    } else if (Gm_GetPlyViewNum() == 2) {
+        obj->viewport_right -= 160 - 34;
+        obj->viewport_left += 34;
+        
     } else if (Gm_IsInCity()) {
         obj->viewport_right -= 160 - 12;
         obj->viewport_left += 12;
@@ -244,14 +272,53 @@ void Wide_PlyViewPosCreateHook(GOBJ *obj) {
     data->plyview_center_pos[3].X += 5;
 }
 
-void Wide_IndicatorGXHook(IndicatorData *data, float *x) {
+void Wide_IndicatorGXHook(int ply, float *x) {
     if (!is_widescreen) return;
     if (Gm_GetPlyViewNum() <= 2) return;
     float adjustment = (640 / 0.75 - 640) / 4;
-    int ply = data->viewdata >> 28;
     if (Ply_GetViewIndex(ply) < 2) {
         *x -= adjustment;
     } else {
         *x += adjustment;
+    }
+}
+void Wide_PlIconGXHook(int mode, int ply, float *x) {
+    if (!is_widescreen) return;
+    float adjustment = (640 / 0.75 - 640) / 2;
+    if (Gm_GetPlyViewNum() <= 2) {
+        switch (mode) {
+            case 2: *x -= adjustment; break; // left of screen
+            case 3: *x += adjustment; break; // right of screen
+        }
+        return;
+    }
+    if (Ply_GetViewIndex(ply) < 2) {
+        switch (mode) {
+            case 1:
+                *x -= adjustment / 2;
+                break;
+            case 2:
+                *x -= adjustment;
+                break;
+        }
+    } else {
+        switch (mode) {
+            case 1:
+                *x += adjustment / 2;
+                break;
+            case 3:
+                *x += adjustment;
+                break;
+        }
+    }
+}
+
+void Wide_CreateStatChartHook(JOBJ *obj, int ply) {
+    if (!is_widescreen) return;
+    float shift_by = Gm_GetPlyViewNum() <= 2 ? 10 : 5;
+    if (Ply_GetViewIndex(ply) < 2) {
+        obj->trans.X -= shift_by;
+    } else {
+        obj->trans.X += shift_by;
     }
 }

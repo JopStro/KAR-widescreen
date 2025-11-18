@@ -6,13 +6,13 @@
 
 typedef struct IndicatorData {
   int x0;
-  int num_plyviews;
-  int viewdata; // first four bytes is the view index
+  int x4;
+  int viewdata; // first four bytes is the player index for the view
   float xC;
   float x10;
   int x14;
   int x18;
-  int ply_indicated;
+  int ply_indicated; // possibly a union/different for enemy indicators
   int is_visible;
 } IndicatorData;
 
@@ -22,7 +22,6 @@ typedef struct IndicatorData {
 static float *stc_aspect = (float*)0x805deb20;
 float default_aspect;
 
-static COBJDesc *stc_memcard_cam = (COBJDesc *)0x808132fc;
 
 static short (*stc_ar_map_viewport)[4] = (void *)0x805d5310;
 static short (*stc_ar_map_scissor)[4]  = (void *)0x805d5318;
@@ -30,6 +29,8 @@ static short (*stc_ct_map_viewport)[4] = (void *)0x805d5320;
 static short (*stc_ct_map_scissor)[4]  = (void *)0x805d5328;
 
 static float *stc_plicon_bound = (float *)0x805dfdd8;
+static float *stc_plicon_left = (float *)0x805dfdec;
+static float *stc_plicon_right = (float *)0x805dfdf0;
 
 #define NUM_VIDEO_DESCS 3
 static COBJDesc *stc_video_descs[NUM_VIDEO_DESCS] = {
@@ -52,6 +53,10 @@ static void Wide_ShiftHudElement(JOBJ *obj, int negate, int neg_splitscreen);
 static void Wide_IndicatorCOBJHOOK(COBJ *obj);
 static void Wide_MapDotsCOBJHOOK(COBJ *obj);
 static void Wide_PlyViewPosCreateHook(GOBJ *obj);
-static void Wide_IndicatorGXHook(IndicatorData *data, float *x);
+static void Wide_IndicatorGXHook(int ply, float *x);
+static void Wide_PlIconGXHook(int mode, int ply, float *x);
+static void Wide_CreateStatChartHook(JOBJ *obj, int ply);
+
+static void Wide_BorderCamGX(GOBJ *g);
 
 #endif // WIDESCREEN_H

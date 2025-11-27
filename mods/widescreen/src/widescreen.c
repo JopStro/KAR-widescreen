@@ -12,7 +12,7 @@
 
 char ModName[] = MOD_NAME;
 char ModAuthor[] = "JoStro";
-char ModVersion[] = "v1.0";
+char ModVersion[] = "v1.1";
 
 OptionDesc ModSettings = {
     .name = "Aspect Ratio",
@@ -249,8 +249,8 @@ void Wide_MapDotsCOBJHOOK(COBJ *obj) {
         obj->viewport_left += 34;
         
     } else if (Gm_IsInCity()) {
-        obj->viewport_right -= 160 - 12;
-        obj->viewport_left += 12;
+        obj->viewport_right -= 160 - 15;
+        obj->viewport_left += 15;
     } else {
         obj->viewport_left += 160 - 12;
         obj->viewport_right -= 12;
